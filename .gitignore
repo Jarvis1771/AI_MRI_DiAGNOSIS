@@ -1,0 +1,38 @@
+# ── Runtime artifacts (temp files) ──
+*.pdf
+uploaded_scan.png
+uploaded_image.png
+gradcam_result.png
+heatmap.png
+
+# ── Dataset (too large to commit) ──
+data/
+dataset/
+*.zip
+
+# ── Python ──
+__pycache__/
+*.pyc
+*.pyo
+*.egg-info/
+
+# ── macOS ──
+.DS_Store
+
+# ── Gradio cache ──
+.gradio/
+flagged/
+
+# ── Virtual environments ──
+venv/
+.venv/
+env/
+
+# ── IDE ──
+.idea/
+.vscode/
+*.swp
+
+# ── Model weights (upload separately or use Git LFS) ──
+# Uncomment the line below if NOT using Git LFS:
+# models/*.pth
