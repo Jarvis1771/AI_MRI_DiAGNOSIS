@@ -12,18 +12,25 @@ Multi-class brain MRI classifier using **EfficientNet-B0** with **99.87% accurac
 | 5 | Multiple Sclerosis | Periventricular white-matter lesions |
 | 6 | Alzheimer's | Diffuse cortical atrophy |
 
+## Features
+- **6-class AI classification** with EfficientNet-B0
+- **Grad-CAM heatmaps** showing model attention regions
+- **Professional PDF reports** with diagnosis, differentials, scan images, probability bars
+- **2-page UI**: Patient input → Analysis results
+- **Stitch AI frontend** with Tailwind CSS + Material Symbols
+
 ## Project Structure
 ```
-├── app.py                   # Gradio web app (main entry point)
-├── config.py                # Class labels, model paths, settings
-├── train_brain_mri.py       # Training script
-├── evaluate_mri_model.py    # Evaluation & confusion matrix
-├── gradcam.py               # Standalone Grad-CAM visualization
-├── medical_predict.py       # CLI prediction script
-├── pdf_report.py            # PDF report generator
-├── prepare_dataset.py       # Dataset download & organization
+├── app.py                       # FastAPI backend (main entry point)
+├── config.py                    # Class labels, model paths, settings
+├── templates/
+│   └── index.html               # Stitch AI frontend (Tailwind + Material Symbols)
 ├── models/
-│   └── brain_mri_multiclass.pth   # Trained model weights (16MB)
+│   └── brain_mri_multiclass.pth # Trained model weights (16MB)
+├── train_brain_mri.py           # Training script
+├── evaluate_mri_model.py        # Evaluation & confusion matrix
+├── gradcam.py                   # Standalone Grad-CAM visualization
+├── prepare_dataset.py           # Dataset download & organization
 ├── requirements.txt
 └── README.md
 ```
@@ -41,12 +48,14 @@ python app.py
 ```
 Opens at `http://localhost:7860`
 
-## Deployment
+## Tech Stack
+- **Model**: EfficientNet-B0 (PyTorch)
+- **Backend**: FastAPI + Uvicorn
+- **Frontend**: HTML + Tailwind CSS + Material Symbols (from Stitch AI)
+- **Reports**: ReportLab (PDF)
+- **Visualization**: Grad-CAM heatmaps
 
-### Hugging Face Spaces
-1. Create a new Space (Gradio SDK)
-2. Upload: `app.py`, `config.py`, `pdf_report.py`, `requirements.txt`, `models/`
-3. The app auto-deploys
+## Deployment
 
 ### Docker
 ```dockerfile
@@ -54,7 +63,8 @@ FROM python:3.11-slim
 WORKDIR /app
 COPY requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
-COPY app.py config.py pdf_report.py ./
+COPY app.py config.py ./
+COPY templates/ templates/
 COPY models/ models/
 EXPOSE 7860
 CMD ["python", "app.py"]
@@ -65,24 +75,18 @@ CMD ["python", "app.py"]
 2. Set build command: `pip install -r requirements.txt`
 3. Set start command: `python app.py`
 
-## Core Files for Deployment
+### Core Files for Deployment
 Only these files are needed to deploy the web app:
-- `app.py`
-- `config.py`
-- `pdf_report.py`
-- `requirements.txt`
-- `models/brain_mri_multiclass.pth`
+- `app.py` — FastAPI server + ML inference + PDF generation
+- `config.py` — Class labels, model paths, settings
+- `templates/index.html` — Frontend UI
+- `models/brain_mri_multiclass.pth` — Trained model weights
+- `requirements.txt` — Python dependencies
 
 ## Training
 To retrain the model:
 ```bash
-python prepare_dataset.py   # Download & organize datasets
-python train_brain_mri.py   # Train EfficientNet-B0 (20 epochs)
-python evaluate_mri_model.py  # Evaluate performance
+python prepare_dataset.py      # Download & organize datasets
+python train_brain_mri.py      # Train EfficientNet-B0 (20 epochs)
+python evaluate_mri_model.py   # Evaluate performance
 ```
-
-## Tech Stack
-- **Model**: EfficientNet-B0 (PyTorch)
-- **UI**: Gradio
-- **Reports**: ReportLab (PDF)
-- **Visualization**: Grad-CAM heatmaps

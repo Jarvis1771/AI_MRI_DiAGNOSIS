@@ -1,4 +1,4 @@
-# ── Runtime artifacts (temp files) ──
+# ── Runtime artifacts ──
 *.pdf
 uploaded_scan.png
 uploaded_image.png
@@ -19,7 +19,7 @@ __pycache__/
 # ── macOS ──
 .DS_Store
 
-# ── Gradio cache ──
+# ── Gradio cache (legacy) ──
 .gradio/
 flagged/
 
@@ -32,6 +32,9 @@ env/
 .idea/
 .vscode/
 *.swp
+
+# ── Static uploads (runtime) ──
+static/uploads/
 
 # ── Model weights (upload separately or use Git LFS) ──
 # Uncomment the line below if NOT using Git LFS:
