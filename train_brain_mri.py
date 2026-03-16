@@ -18,6 +18,9 @@ import torch.optim as optim
 from torch.utils.data import DataLoader, WeightedRandomSampler
 from torchvision import datasets, transforms, models
 import numpy as np
+import matplotlib
+matplotlib.use('Agg')  # non-interactive backend
+import matplotlib.pyplot as plt
 
 from config import (
     CLASS_NAMES, NUM_CLASSES, MODEL_PATH,
@@ -101,6 +104,55 @@ def build_model():
     model.classifier[1] = nn.Linear(in_features, NUM_CLASSES)
     return model.to(device)
 
+# ── Plot training curves ──────────────────────────────────────────────────────
+CURVES_PATH = "training_curves.png"
+
+def plot_training_curves(history):
+    """Save a dual-panel figure: Loss vs Epochs + Accuracy vs Epochs."""
+    epochs = range(1, len(history["loss"]) + 1)
+
+    fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(14, 5))
+
+    # ── Loss curve ────────────────────────────────────────────────────────
+    ax1.plot(epochs, history["loss"], 'o-', color='#dc2626', linewidth=2,
+             markersize=5, label='Training Loss')
+    ax1.fill_between(epochs, history["loss"], alpha=0.1, color='#dc2626')
+    ax1.set_xlabel('Epoch', fontsize=12, fontweight='bold')
+    ax1.set_ylabel('Loss', fontsize=12, fontweight='bold')
+    ax1.set_title('Training Loss vs Epochs', fontsize=14, fontweight='bold', pad=10)
+    ax1.legend(fontsize=10)
+    ax1.grid(True, alpha=0.3)
+    ax1.set_xlim(1, len(epochs))
+
+    # ── Accuracy curve ────────────────────────────────────────────────────
+    ax2.plot(epochs, history["val_acc"], 'o-', color='#0d9488', linewidth=2,
+             markersize=5, label='Validation Accuracy')
+    ax2.fill_between(epochs, history["val_acc"], alpha=0.1, color='#0d9488')
+    ax2.set_xlabel('Epoch', fontsize=12, fontweight='bold')
+    ax2.set_ylabel('Accuracy (%)', fontsize=12, fontweight='bold')
+    ax2.set_title('Validation Accuracy vs Epochs', fontsize=14, fontweight='bold', pad=10)
+    ax2.legend(fontsize=10, loc='lower right')
+    ax2.grid(True, alpha=0.3)
+    ax2.set_xlim(1, len(epochs))
+    ax2.set_ylim(min(history["val_acc"]) - 2, 101)
+
+    # Mark best epoch
+    best_idx = np.argmax(history["val_acc"])
+    ax2.annotate(f'Best: {history["val_acc"][best_idx]:.2f}%',
+                 xy=(best_idx + 1, history["val_acc"][best_idx]),
+                 xytext=(best_idx + 1, history["val_acc"][best_idx] - 3),
+                 fontsize=9, fontweight='bold', color='#0d9488',
+                 arrowprops=dict(arrowstyle='->', color='#0d9488'),
+                 ha='center')
+
+    fig.suptitle('EfficientNet-B0 · Brain MRI 6-Class Classifier',
+                 fontsize=16, fontweight='bold', y=1.02)
+    plt.tight_layout()
+    plt.savefig(CURVES_PATH, dpi=200, bbox_inches='tight', facecolor='white')
+    print(f"📈 Training curves saved to: {CURVES_PATH}")
+    plt.close()
+
+
 # ── Training loop ─────────────────────────────────────────────────────────────
 def train():
     validate_dataset_structure()
@@ -131,6 +183,7 @@ def train():
     scheduler = optim.lr_scheduler.StepLR(optimizer, step_size=7, gamma=0.1)
 
     best_acc = 0.0
+    history = {"loss": [], "val_acc": []}
     print(f"\n🚀 Training for {EPOCHS} epochs...\n")
 
     for epoch in range(EPOCHS):
@@ -161,6 +214,9 @@ def train():
 
         acc      = 100 * correct / total
         avg_loss = running_loss / len(train_loader)
+        history["loss"].append(avg_loss)
+        history["val_acc"].append(acc)
+
         print(f"Epoch [{epoch+1:02d}/{EPOCHS}] | Loss: {avg_loss:.4f} | Val Acc: {acc:.2f}%", end="")
 
         if acc > best_acc:
@@ -169,6 +225,9 @@ def train():
             print(f"  ✅ Saved (best so far)")
         else:
             print()
+
+    # Save training curves plot
+    plot_training_curves(history)
 
     print(f"\n✅ Training complete")
     print(f"🏆 Best Validation Accuracy: {best_acc:.2f}%")
