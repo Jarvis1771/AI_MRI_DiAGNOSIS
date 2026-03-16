@@ -1,3 +1,15 @@
+---
+title: Brain MRI Diagnostic System
+emoji: 🧠
+colorFrom: green
+colorTo: green
+sdk: docker
+app_port: 7860
+license: mit
+pinned: false
+short_description: AI Brain MRI classifier with 99.87% accuracy
+---
+
 # Brain MRI AI Diagnostic System
 
 Multi-class brain MRI classifier using **EfficientNet-B0** with **99.87% accuracy**.
